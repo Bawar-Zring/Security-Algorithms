@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DES Encryption Tool</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>DES Encryption Tool</h1>
+        </header>
+        
+        <main>
+            <div class="card">
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="encrypt">Encrypt</button>
+                    <button class="tab-btn" data-tab="decrypt">Decrypt</button>
+                </div>
+
+                <div class="tab-content active" id="encrypt">
+                    <div class="input-group">
+                        <label for="plaintext">Plaintext:</label>
+                        <textarea id="plaintext" placeholder="Enter text to encrypt..."></textarea>
+                    </div>
+                    <div class="input-group">
+                        <label for="encryption-key">Key (optional, 64-bit binary):</label>
+                        <div class="key-input-group">
+                            <input type="text" id="encryption-key" placeholder="Enter key or generate random...">
+                            <button id="generate-key" title="Generate Random Key">
+                                <i class="fas fa-dice"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button id="encrypt-btn" class="action-btn">
+                        <i class="fas fa-lock"></i> Encrypt
+                    </button>
+                    <div class="result-box">
+                        <label>Encrypted Result:</label>
+                        <div class="result-content">
+                            <pre id="encrypted-result">Your encrypted text will appear here...</pre>
+                            <button class="copy-btn" data-target="encrypted-result">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="decrypt">
+                    <div class="input-group">
+                        <label for="ciphertext">Ciphertext:</label>
+                        <textarea id="ciphertext" placeholder="Enter text to decrypt..."></textarea>
+                    </div>
+                    <div class="input-group">
+                        <label for="decryption-key">Key (64-bit binary):</label>
+                        <input type="text" id="decryption-key" placeholder="Enter the decryption key...">
+                    </div>
+                    <button id="decrypt-btn" class="action-btn">
+                        <i class="fas fa-unlock"></i> Decrypt
+                    </button>
+                    <div class="result-box">
+                        <label>Decrypted Result:</label>
+                        <div class="result-content">
+                            <pre id="decrypted-result">Your decrypted text will appear here...</pre>
+                            <button class="copy-btn" data-target="decrypted-result">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card info-card">
+                <h2>About DES Encryption</h2>
+                <ul>
+                    <li><i class="fas fa-shield-alt"></i> Secure encryption using 56-bit key</li>
+                    <li><i class="fas fa-sync"></i> 16 rounds of Feistel network</li>
+                    <li><i class="fas fa-key"></i> Uses S-boxes and P-boxes for confusion and diffusion</li>
+                    <li><i class="fas fa-random"></i> Option to generate random keys</li>
+                </ul>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html> 
