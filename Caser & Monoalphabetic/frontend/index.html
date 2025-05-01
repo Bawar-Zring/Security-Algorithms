@@ -198,10 +198,15 @@
         .attack-item {
             padding: 8px;
             border-bottom: 1px solid #eee;
+            cursor: pointer;
         }
 
         .attack-item:hover {
             background-color: #f0f4f8;
+        }
+
+        .selected-attack {
+            background-color: #e3f2fd;
         }
     </style>
 </head>
@@ -279,10 +284,29 @@
                 </button>
 
                 <div class="result-container">
-                    <label>Possible Decryptions:</label>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                        <label>Possible Decryptions:</label>
+                        <button class="copy-btn" id="caesar-attack-selected-copy" style="display: none;">
+                            <i class="fas fa-copy"></i> Copy Selected
+                        </button>
+                    </div>
                     <div class="attack-results" id="caesar-attack-results">
                         <!-- Attack results will be populated here -->
+                        <p class="result-text">Possible decryptions will appear here after analysis...</p>
                     </div>
+                </div>
+                
+                <div class="result-container" id="selected-result-container" style="display: none; margin-top: 10px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                        <label>Selected Decryption:</label>
+                        <button class="copy-btn" id="selected-decrypt-copy">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                    <p class="result-text" id="selected-decrypt-result"></p>
+                    <button id="use-selected-btn" style="margin-top: 10px; background-color: #34a853;">
+                        <i class="fas fa-check"></i> Use This Decryption
+                    </button>
                 </div>
             </div>
 
@@ -408,6 +432,7 @@
         // Current state
         let currentCipher = 'caesar';
         let currentOperation = 'encrypt';
+        let selectedAttackResult = null;
 
         // Initialize UI
         function updateUI() {
@@ -432,6 +457,8 @@
                 } else if (currentOperation === 'attack') {
                     caesarAttackForm.classList.remove('hidden');
                 }
+                // Show attack tab for Caesar cipher
+                document.getElementById('attack-tab').style.display = 'block';
             } else if (currentCipher === 'mono') {
                 monoInfo.classList.remove('hidden');
                 if (currentOperation === 'encrypt') {
@@ -440,8 +467,17 @@
                     monoDecryptForm.classList.remove('hidden');
                 }
                 // Hide attack tab for monoalphabetic cipher
-                document.getElementById('attack-tab').style.display = 
-                    currentCipher === 'mono' ? 'none' : 'block';
+                document.getElementById('attack-tab').style.display = 'none';
+                
+                // If current operation is attack, switch to encrypt
+                if (currentOperation === 'attack') {
+                    currentOperation = 'encrypt';
+                    tabs.forEach(t => {
+                        t.classList.remove('active', 'inactive');
+                        t.classList.add(t.id === 'encrypt-tab' ? 'active' : 'inactive');
+                    });
+                    monoEncryptForm.classList.remove('hidden');
+                }
             }
         }
 
@@ -607,29 +643,92 @@
                 const resultsContainer = document.getElementById('caesar-attack-results');
                 resultsContainer.innerHTML = '';
                 
+                // Hide selected result container
+                document.getElementById('selected-result-container').style.display = 'none';
+                document.getElementById('caesar-attack-selected-copy').style.display = 'none';
+                
+                // Reset selected attack result
+                selectedAttackResult = null;
+                
+                if (data.results.length === 0) {
+                    resultsContainer.innerHTML = '<p>No results found.</p>';
+                    return;
+                }
+                
                 data.results.forEach(result => {
                     const item = document.createElement('div');
                     item.className = 'attack-item';
+                    item.dataset.shift = result.shift;
+                    item.dataset.plaintext = result.plaintext;
                     item.innerHTML = `<strong>Shift ${result.shift}:</strong> ${result.plaintext}`;
+                    
                     item.addEventListener('click', () => {
-                        // Populate decrypt form with this result
-                        document.getElementById('caesar-ciphertext').value = ciphertext;
-                        document.getElementById('caesar-decrypt-shift').value = result.shift;
+                        // Remove selected class from all items
+                        document.querySelectorAll('.attack-item').forEach(i => i.classList.remove('selected-attack'));
                         
-                        // Switch to decrypt tab
-                        tabs.forEach(t => {
-                            t.classList.remove('active', 'inactive');
-                            t.classList.add(t.id === 'decrypt-tab' ? 'active' : 'inactive');
-                        });
-                        currentOperation = 'decrypt';
-                        updateUI();
+                        // Add selected class to this item
+                        item.classList.add('selected-attack');
+                        
+                        // Show selected result
+                        document.getElementById('selected-result-container').style.display = 'block';
+                        document.getElementById('selected-decrypt-result').textContent = result.plaintext;
+                        document.getElementById('caesar-attack-selected-copy').style.display = 'block';
+                        
+                        // Store selected result
+                        selectedAttackResult = result;
                     });
+                    
                     resultsContainer.appendChild(item);
                 });
             } catch (error) {
                 console.error('Error:', error);
                 alert('Failed to analyze text: ' + error.message);
             }
+        });
+
+        // Use selected decryption button
+        document.getElementById('use-selected-btn').addEventListener('click', () => {
+            if (!selectedAttackResult) {
+                alert('Please select a decryption result first');
+                return;
+            }
+            
+            // Populate decrypt form with this result
+            document.getElementById('caesar-ciphertext').value = document.getElementById('caesar-attack-text').value;
+            document.getElementById('caesar-decrypt-shift').value = selectedAttackResult.shift;
+            document.getElementById('caesar-decrypt-result').textContent = selectedAttackResult.plaintext;
+            
+            // Switch to decrypt tab
+            tabs.forEach(t => {
+                t.classList.remove('active', 'inactive');
+                t.classList.add(t.id === 'decrypt-tab' ? 'active' : 'inactive');
+            });
+            currentOperation = 'decrypt';
+            updateUI();
+        });
+
+        // Copy selected attack result
+        document.getElementById('caesar-attack-selected-copy').addEventListener('click', () => {
+            if (!selectedAttackResult) {
+                alert('Please select a decryption result first');
+                return;
+            }
+            
+            // Create a temporary textarea to copy the text
+            const textarea = document.createElement('textarea');
+            textarea.value = selectedAttackResult.plaintext;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            
+            // Visual feedback
+            const btn = document.getElementById('caesar-attack-selected-copy');
+            const originalIcon = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+            setTimeout(() => {
+                btn.innerHTML = originalIcon;
+            }, 1000);
         });
 
         // Mono Encrypt
