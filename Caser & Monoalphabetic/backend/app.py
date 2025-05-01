@@ -6,6 +6,12 @@ from typing import List, Dict, Optional
 from collections import Counter
 import random
 import string
+from fastapi.staticfiles import StaticFiles          # ★
+from fastapi.responses import FileResponse           # ★
+from pathlib import Path 
+
+BASE_DIR = Path(__file__).resolve().parent           # .../backend
+FRONT_DIR = BASE_DIR.parent / "frontend"
 
 app = FastAPI(
     title="Cipher API",
@@ -21,6 +27,13 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.mount("/assets", StaticFiles(directory=FRONT_DIR), name="assets")   # ★
+
+@app.get("/", include_in_schema=False)
+def serve_spa():
+    """Return the main HTML file."""
+    return FileResponse(FRONT_DIR / "index.html")
 
 # --------------------------
 # Request / Response models
