@@ -1,149 +1,135 @@
+# app.py
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import Dict, List
+from typing import List, Dict, Optional
 from collections import Counter
 import random
 import string
 
-# ───────────────────────────────────────── FastAPI setup
-app = FastAPI(title="Cipher API", version="2.0.0")
+app = FastAPI(
+    title="Cipher API",
+    description="API for Caesar and Monoalphabetic cipher operations",
+    version="1.0.0"
+)
+
+# CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],          # change if you need stricter CORS
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# ───────────────────────────────────────── Pydantic models
-class CaesarBody(BaseModel):
+# --------------------------
+# Request / Response models
+# --------------------------
+class CipherRequest(BaseModel):
     text: str
-    shift: int
+    shift: Optional[int] = None           # used only by Caesar
 
-class MonoBody(BaseModel):
+class DecryptRequest(BaseModel):
     text: str
-    substitution_key: Dict[str, str] | None = None  # optional on encrypt
+    key: Optional[Dict[str, str]] = None  # used only by Monoalphabetic
+    shift: Optional[int] = None           # used only by Caesar
 
-class GenericEncryptBody(BaseModel):
-    plaintext: str
-    key: str | Dict[str, str] | None = None         # 64-bit bin str or dict
+class CipherResponse(BaseModel):
+    result: str
+    key: Optional[Dict[str, str]] = None
 
-class GenericDecryptBody(BaseModel):
-    ciphertext: str
-    key: str | Dict[str, str]
+class AttackResponse(BaseModel):
+    results: List[dict]
 
-# ───────────────────────────────────────── Caesar helpers
-def caesar_encrypt(text: str, shift: int) -> str:
-    out = []
-    for ch in text:
-        if ch.isascii():
-            out.append(chr((ord(ch) + shift) % 256))
+# --------------------------
+# Caesar Cipher
+# --------------------------
+def caesar_encrypt(plaintext: str, shift: int) -> str:
+    encrypted_text = ""
+    for char in plaintext:
+        if char.isalpha():
+            shift_amount = shift % 26
+            if char.isupper():
+                new_char = chr((ord(char) - ord('A') + shift_amount) % 26 + ord('A'))
+            else:
+                new_char = chr((ord(char) - ord('a') + shift_amount) % 26 + ord('a'))
+            encrypted_text += new_char
         else:
-            out.append(ch)
-    return ''.join(out)
+            encrypted_text += char
+    return encrypted_text
 
-def caesar_decrypt(text: str, shift: int) -> str:
-    return caesar_encrypt(text, (-shift) % 256)
+def caesar_decrypt(ciphertext: str, shift: int) -> str:
+    return caesar_encrypt(ciphertext, -shift)
 
-def caesar_attack(text: str) -> List[Dict]:
-    return [
-        {"shift": s, "decrypted": caesar_decrypt(text, s)}
-        for s in range(256)
-    ]
+def caesar_attack(ciphertext: str) -> List[Dict[str, any]]:
+    return [{"shift": s, "plaintext": caesar_decrypt(ciphertext, s)} for s in range(26)]
 
-# ───────────────────────────────────────── Mono-alphabetic helpers
-def make_sub_key() -> Dict[str, str]:
-    chars = list(string.printable)
+# --------------------------
+# Monoalphabetic Cipher
+# --------------------------
+def create_substitution_key() -> Dict[str, str]:
+    chars = list(string.ascii_letters + string.digits + string.punctuation + ' ')
     shuffled = chars.copy()
     random.shuffle(shuffled)
     return dict(zip(chars, shuffled))
 
-def mono_encrypt(text: str, key: Dict[str, str] | None = None) -> tuple[str, Dict[str, str]]:
-    key = key or make_sub_key()
-    return ''.join(key.get(c, c) for c in text), key
+def monoalphabetic_encrypt(text: str) -> tuple[str, Dict[str, str]]:
+    key = create_substitution_key()
+    encrypted = ''.join(key.get(c, c) for c in text)
+    return encrypted, key
 
-def mono_decrypt(text: str, key: Dict[str, str]) -> str:
-    rev = {v: k for k, v in key.items()}
-    return ''.join(rev.get(c, c) for c in text)
+def monoalphabetic_decrypt(text: str, key: Dict[str, str]) -> str:
+    reverse_key = {v: k for k, v in key.items()}
+    return ''.join(reverse_key.get(c, c) for c in text)
 
-def mono_attack(text: str) -> List[Dict]:
-    # simple frequency dump – extend as you wish
-    freq = Counter(c.lower() for c in text if c.isalpha())
-    ordered = ''.join(ch for ch, _ in freq.most_common())
-    return [{"description": "letter frequency order", "frequencies": ordered}]
-
-# ───────────────────────────────────────── Caesar routes
-@app.post("/caesar/encrypt")
-def caesar_encrypt_route(body: CaesarBody):   
-    if not 0 <= body.shift <= 255:
-        raise HTTPException(400, "shift must be 0-255")
-    return {"result": caesar_encrypt(body.text, body.shift)}
-
-@app.post("/caesar/decrypt")
-def caesar_decrypt_route(body: CaesarBody):
-    if not 0 <= body.shift <= 255:
-        raise HTTPException(400, "shift must be 0-255")
-    return {"result": caesar_decrypt(body.text, body.shift)}
-
-@app.post("/caesar/attack")
-def caesar_attack_route(body: CaesarBody):
-    return {"results": caesar_attack(body.text)}
-
-# ───────────────────────────────────────── Mono routes
-@app.post("/monoalphabetic/encrypt")
-def mono_encrypt_route(body: MonoBody):
-    encrypted, key = mono_encrypt(body.text, body.substitution_key)
-    return {"result": encrypted, "key": key}
-
-@app.post("/monoalphabetic/decrypt")
-def mono_decrypt_route(body: MonoBody):
-    if body.substitution_key is None:
-        raise HTTPException(400, "substitution_key is required")
-    return {"result": mono_decrypt(body.text, body.substitution_key)}
-
-@app.post("/monoalphabetic/attack")
-def mono_attack_route(body: MonoBody):
-    return {"results": mono_attack(body.text)}
-
-# ───────────────────────────────────────── Generic endpoints for the UI
-@app.post("/encrypt")
-def generic_encrypt(body: GenericEncryptBody):
-    # 1) If key is a dict ⇒ mono-alphabetic
-    if isinstance(body.key, dict):
-        encrypted, key = mono_encrypt(body.plaintext, body.key)
-        return {"encrypted": encrypted, "key": key}
-
-    # 2) Else treat key (or None) as 64-bit binary for Caesar
-    shift = int(body.key, 2) % 256 if body.key else random.randint(0, 255)
-    key_bin = format(shift, "064b")  # always return key so UI can display
-    encrypted = caesar_encrypt(body.plaintext, shift)
-    return {"encrypted": encrypted, "key": key_bin}
-
-@app.post("/decrypt")
-def generic_decrypt(body: GenericDecryptBody):
-    # 1) Dict key ⇒ mono
-    if isinstance(body.key, dict):
-        return {"decrypted": mono_decrypt(body.ciphertext, body.key)}
-
-    # 2) Binary str key ⇒ Caesar
-    if not isinstance(body.key, str) or not len(body.key) == 64 or not set(body.key) <= {"0", "1"}:
-        raise HTTPException(400, "Key must be 64-bit binary")
-    shift = int(body.key, 2) % 256
-    return {"decrypted": caesar_decrypt(body.ciphertext, shift)}
-
-# ───────────────────────────────────────── Root
+# --------------------------
+# Routes
+# --------------------------
 @app.get("/")
-def root():
+async def root():
     return {
-        "message": "Cipher API - unified version",
-        "ui_endpoints": { "encrypt": "/encrypt", "decrypt": "/decrypt" },
-        "advanced": {
-            "caesar": ["/caesar/encrypt", "/caesar/decrypt", "/caesar/attack"],
-            "monoalphabetic": ["/monoalphabetic/encrypt", "/monoalphabetic/decrypt", "/monoalphabetic/attack"]
+        "message": "Cipher API",
+        "endpoints": {
+            "/caesar/encrypt (POST)": "Caesar encryption",
+            "/caesar/decrypt (POST)": "Caesar decryption",
+            "/caesar/attack  (POST)": "Caesar brute-force attack",
+            "/mono/encrypt   (POST)": "Monoalphabetic encryption",
+            "/mono/decrypt   (POST)": "Monoalphabetic decryption"
         }
     }
 
+# ---- Caesar ----
+@app.post("/caesar/encrypt")
+async def encrypt_caesar(request: CipherRequest):
+    if request.shift is None or not 0 <= request.shift <= 25:
+        raise HTTPException(400, "Shift must be 0-25")
+    return {"result": caesar_encrypt(request.text, request.shift)}
+
+@app.post("/caesar/decrypt")
+async def decrypt_caesar(request: DecryptRequest):
+    if request.shift is None or not 0 <= request.shift <= 25:
+        raise HTTPException(400, "Shift must be 0-25")
+    return {"result": caesar_decrypt(request.text, request.shift)}
+
+@app.post("/caesar/attack", response_model=AttackResponse)
+async def attack_caesar(request: CipherRequest):
+    return AttackResponse(results=caesar_attack(request.text))
+
+# ---- Monoalphabetic ----
+@app.post("/mono/encrypt", response_model=CipherResponse)
+async def encrypt_mono(request: CipherRequest):
+    encrypted, key = monoalphabetic_encrypt(request.text)
+    return CipherResponse(result=encrypted, key=key)
+
+@app.post("/mono/decrypt", response_model=CipherResponse)
+async def decrypt_mono(request: DecryptRequest):
+    if not request.key:
+        raise HTTPException(400, "Decryption key required")
+    return CipherResponse(result=monoalphabetic_decrypt(request.text, request.key))
+
+# --------------------------
+# Uvicorn entry point
+# --------------------------
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8000)

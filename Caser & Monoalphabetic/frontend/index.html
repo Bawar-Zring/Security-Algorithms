@@ -4,187 +4,714 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cipher Encryption Tool</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f4f8;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            color: #4285f4;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .container {
+            display: flex;
+            max-width: 1200px;
+            gap: 20px;
+            width: 100%;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            flex: 1;
+        }
+
+        .tab-container {
+            display: flex;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            margin-right: 10px;
+        }
+
+        .tab.active {
+            background-color: #4285f4;
+            color: white;
+        }
+
+        .tab.inactive {
+            background-color: #f1f3f4;
+            color: #333;
+        }
+
+        .cipher-tabs {
+            display: flex;
+            margin-bottom: 20px;
+        }
+
+        .cipher-tab {
+            padding: 8px 16px;
+            cursor: pointer;
+            font-weight: 500;
+            background-color: #f1f3f4;
+            color: #333;
+            border: none;
+            margin-right: 10px;
+        }
+
+        .cipher-tab.active {
+            background-color: #4285f4;
+            color: white;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        textarea, input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            resize: vertical;
+        }
+
+        button {
+            background-color: #4285f4;
+            color: white;
+            padding: 12px 0;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        button:hover {
+            background-color: #3367d6;
+        }
+
+        .result-container {
+            background-color: #f5f7fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        .result-text {
+            margin: 0;
+            word-break: break-all;
+            font-family: monospace;
+        }
+
+        .about-section {
+            flex: 0 0 350px;
+        }
+
+        .about-title {
+            color: #4285f4;
+            margin-bottom: 20px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .info-icon {
+            color: #4285f4;
+            margin-right: 10px;
+            font-size: 18px;
+        }
+
+        .copy-btn {
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            padding: 0;
+            width: auto;
+            float: right;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .key-container {
+            display: flex;
+        }
+
+        .key-input {
+            flex: 1;
+        }
+
+        .random-btn {
+            background-color: #f1f3f4;
+            border: none;
+            border-radius: 5px;
+            width: 40px;
+            margin-left: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .key-display {
+            max-height: 150px;
+            overflow-y: auto;
+            font-family: monospace;
+            background-color: #f5f7fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .attack-results {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .attack-item {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .attack-item:hover {
+            background-color: #f0f4f8;
+        }
+    </style>
 </head>
 <body>
+    <h1>Cipher Encryption Tool</h1>
+
     <div class="container">
-        <header>
-            <h1>Cipher Encryption Tool</h1>
-            <div class="cipher-select">
-                <label for="cipher-type">Select Cipher:</label>
-                <select id="cipher-type">
-                    <option value="caesar">Caesar Cipher</option>
-                    <option value="mono">Monoalphabetic Cipher</option>
-                </select>
+        <div class="card">
+            <!-- Cipher Type Tabs -->
+            <div class="cipher-tabs">
+                <button class="cipher-tab active" id="caesar-tab">Caesar Cipher</button>
+                <button class="cipher-tab" id="mono-tab">Monoalphabetic Cipher</button>
             </div>
-        </header>
-        
-        <main>
-            <div class="card">
-                <div class="tabs">
-                    <button class="tab-btn active" data-tab="encrypt">Encrypt</button>
-                    <button class="tab-btn" data-tab="decrypt">Decrypt</button>
-                    <button class="tab-btn" data-tab="attack">Attack</button>
-                </div>
 
-                <div class="tab-content active" id="encrypt">
-                    <div class="input-group">
-                        <label for="plaintext">Plaintext:</label>
-                        <textarea id="plaintext" placeholder="Enter text to encrypt..."></textarea>
-                    </div>
-                    
-                    <!-- Caesar Cipher Controls -->
-                    <div class="cipher-controls" id="caesar-controls">
-                        <div class="input-group">
-                            <label for="caesar-shift">Shift Value (0-255):</label>
-                            <div class="key-input-group">
-                                <input type="number" id="caesar-shift" min="0" max="255" value="13">
-                                <button id="random-shift" title="Generate Random Shift">
-                                    <i class="fas fa-dice"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Monoalphabetic Cipher Controls -->
-                    <div class="cipher-controls" id="mono-controls" style="display: none;">
-                        <div class="input-group">
-                            <label for="use-custom-key">Key Options:</label>
-                            <div class="key-options">
-                                <label>
-                                    <input type="radio" name="key-type" value="random" checked>
-                                    Generate random substitution key
-                                </label>
-                                <label>
-                                    <input type="radio" name="key-type" value="custom">
-                                    Use custom key
-                                </label>
-                            </div>
-                        </div>
-                        <div id="custom-key-input" style="display: none;">
-                            <div class="input-group">
-                                <label>Define Custom Key:</label>
-                                <div class="key-mapping-container">
-                                    <div class="key-mapping-help">
-                                        <p>Define character mappings below:</p>
-                                        <button id="add-mapping" title="Add Mapping">
-                                            <i class="fas fa-plus"></i> Add Mapping
-                                        </button>
-                                    </div>
-                                    <div id="key-mappings">
-                                        <!-- Mappings will be added here -->
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <button id="encrypt-btn" class="action-btn">
-                        <i class="fas fa-lock"></i> Encrypt
-                    </button>
-                    
-                    <div class="result-box">
+            <!-- Operation Tabs -->
+            <div class="tab-container">
+                <div class="tab active" id="encrypt-tab">Encrypt</div>
+                <div class="tab inactive" id="decrypt-tab">Decrypt</div>
+                <div class="tab inactive" id="attack-tab">Attack</div>
+            </div>
+
+            <!-- Caesar Encrypt Form -->
+            <div id="caesar-encrypt-form">
+                <label for="caesar-plaintext">Plaintext:</label>
+                <textarea id="caesar-plaintext" rows="5" placeholder="Enter text to encrypt..."></textarea>
+
+                <label for="caesar-shift">Shift (0-25):</label>
+                <input type="number" id="caesar-shift" min="0" max="25" value="3">
+
+                <button id="caesar-encrypt-btn">
+                    <i class="fas fa-lock"></i> Encrypt
+                </button>
+
+                <div class="result-container">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
                         <label>Encrypted Result:</label>
-                        <div class="result-content">
-                            <pre id="encrypted-result">Your encrypted text will appear here...</pre>
-                            <button class="copy-btn" data-target="encrypted-result">
-                                <i class="fas fa-copy"></i>
-                            </button>
-                        </div>
+                        <button class="copy-btn" id="caesar-encrypt-copy">
+                            <i class="fas fa-copy"></i>
+                        </button>
                     </div>
-                    
-                    <div class="key-display">
-                        <label>Encryption Key:</label>
-                        <div class="key-content">
-                            <pre id="encryption-key-display">Key will appear here after encryption...</pre>
-                            <button class="copy-btn" data-target="encryption-key-display">
-                                <i class="fas fa-copy"></i>
-                            </button>
-                        </div>
-                    </div>
+                    <p class="result-text" id="caesar-encrypt-result">Your encrypted text will appear here...</p>
                 </div>
+            </div>
 
-                <div class="tab-content" id="decrypt">
-                    <div class="input-group">
-                        <label for="ciphertext">Ciphertext:</label>
-                        <textarea id="ciphertext" placeholder="Enter text to decrypt..."></textarea>
-                    </div>
-                    
-                    <!-- Caesar Cipher Decrypt Controls -->
-                    <div class="cipher-controls" id="caesar-decrypt-controls">
-                        <div class="input-group">
-                            <label for="caesar-decrypt-shift">Shift Value (0-255):</label>
-                            <input type="number" id="caesar-decrypt-shift" min="0" max="255" value="13">
-                        </div>
-                    </div>
-                    
-                    <!-- Monoalphabetic Cipher Decrypt Controls -->
-                    <div class="cipher-controls" id="mono-decrypt-controls" style="display: none;">
-                        <div class="input-group">
-                            <label for="key-input">Enter Substitution Key (JSON format):</label>
-                            <textarea id="key-input" placeholder='{"a":"x", "b":"y", ...}'></textarea>
-                        </div>
-                    </div>
-                    
-                    <button id="decrypt-btn" class="action-btn">
-                        <i class="fas fa-unlock"></i> Decrypt
-                    </button>
-                    
-                    <div class="result-box">
+            <!-- Caesar Decrypt Form -->
+            <div id="caesar-decrypt-form" class="hidden">
+                <label for="caesar-ciphertext">Ciphertext:</label>
+                <textarea id="caesar-ciphertext" rows="5" placeholder="Enter text to decrypt..."></textarea>
+
+                <label for="caesar-decrypt-shift">Shift (0-25):</label>
+                <input type="number" id="caesar-decrypt-shift" min="0" max="25" value="3">
+
+                <button id="caesar-decrypt-btn">
+                    <i class="fas fa-unlock"></i> Decrypt
+                </button>
+
+                <div class="result-container">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
                         <label>Decrypted Result:</label>
-                        <div class="result-content">
-                            <pre id="decrypted-result">Your decrypted text will appear here...</pre>
-                            <button class="copy-btn" data-target="decrypted-result">
-                                <i class="fas fa-copy"></i>
-                            </button>
-                        </div>
+                        <button class="copy-btn" id="caesar-decrypt-copy">
+                            <i class="fas fa-copy"></i>
+                        </button>
                     </div>
+                    <p class="result-text" id="caesar-decrypt-result">Your decrypted text will appear here...</p>
                 </div>
-                
-                <div class="tab-content" id="attack">
-                    <div class="input-group">
-                        <label for="attack-text">Ciphertext to Analyze:</label>
-                        <textarea id="attack-text" placeholder="Enter encrypted text to analyze..."></textarea>
-                    </div>
-                    
-                    <button id="attack-btn" class="action-btn">
-                        <i class="fas fa-search"></i> Analyze
-                    </button>
-                    
-                    <div class="result-box">
-                        <label>Attack Results:</label>
-                        <div id="attack-results" class="attack-results">
-                            <div class="no-results">Analysis results will appear here...</div>
-                        </div>
+            </div>
+
+            <!-- Caesar Attack Form -->
+            <div id="caesar-attack-form" class="hidden">
+                <label for="caesar-attack-text">Ciphertext:</label>
+                <textarea id="caesar-attack-text" rows="5" placeholder="Enter text to analyze..."></textarea>
+
+                <button id="caesar-attack-btn">
+                    <i class="fas fa-key"></i> Perform Brute Force Attack
+                </button>
+
+                <div class="result-container">
+                    <label>Possible Decryptions:</label>
+                    <div class="attack-results" id="caesar-attack-results">
+                        <!-- Attack results will be populated here -->
                     </div>
                 </div>
             </div>
 
-            <div class="card info-card">
-                <h2>About Cipher Tools</h2>
-                <div id="caesar-info">
-                    <h3>Caesar Cipher</h3>
-                    <ul>
-                        <li><i class="fas fa-history"></i> One of the simplest encryption techniques</li>
-                        <li><i class="fas fa-exchange-alt"></i> Shifts characters by a fixed value</li>
-                        <li><i class="fas fa-shield-alt"></i> Vulnerable to brute force attacks</li>
-                        <li><i class="fas fa-info-circle"></i> Used by Julius Caesar to communicate</li>
-                    </ul>
-                </div>
-                
-                <div id="mono-info" style="display: none;">
-                    <h3>Monoalphabetic Cipher</h3>
-                    <ul>
-                        <li><i class="fas fa-random"></i> Substitutes each character with another</li>
-                        <li><i class="fas fa-key"></i> Uses a substitution key for mapping</li>
-                        <li><i class="fas fa-chart-bar"></i> Vulnerable to frequency analysis</li>
-                        <li><i class="fas fa-puzzle-piece"></i> More complex than Caesar cipher</li>
-                    </ul>
+            <!-- Mono Encrypt Form -->
+            <div id="mono-encrypt-form" class="hidden">
+                <label for="mono-plaintext">Plaintext:</label>
+                <textarea id="mono-plaintext" rows="5" placeholder="Enter text to encrypt..."></textarea>
+
+                <button id="mono-encrypt-btn">
+                    <i class="fas fa-lock"></i> Encrypt with Random Key
+                </button>
+
+                <div class="result-container">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                        <label>Encryption Key:</label>
+                        <button class="copy-btn" id="mono-key-copy">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                    <div class="key-display" id="mono-key-display">
+                        Key will be generated after encryption...
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                        <label>Encrypted Result:</label>
+                        <button class="copy-btn" id="mono-encrypt-copy">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                    <p class="result-text" id="mono-encrypt-result">Your encrypted text will appear here...</p>
                 </div>
             </div>
-        </main>
+
+            <!-- Mono Decrypt Form -->
+            <div id="mono-decrypt-form" class="hidden">
+                <label for="mono-ciphertext">Ciphertext:</label>
+                <textarea id="mono-ciphertext" rows="5" placeholder="Enter text to decrypt..."></textarea>
+
+                <label for="mono-key-input">Decryption Key (JSON format):</label>
+                <textarea id="mono-key-input" rows="5" placeholder='{"a":"x", "b":"y", ...}'></textarea>
+
+                <button id="mono-decrypt-btn">
+                    <i class="fas fa-unlock"></i> Decrypt
+                </button>
+
+                <div class="result-container">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                        <label>Decrypted Result:</label>
+                        <button class="copy-btn" id="mono-decrypt-copy">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                    <p class="result-text" id="mono-decrypt-result">Your decrypted text will appear here...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card about-section">
+            <h2 class="about-title">About Cipher Encryption</h2>
+            
+            <div id="caesar-info">
+                <div class="info-item">
+                    <div class="info-icon">🔒</div>
+                    <div>Simple substitution cipher replacing each letter with another letter a fixed number of positions away in the alphabet</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-icon">🔄</div>
+                    <div>Uses a shift value between 0-25 for the 26 letters of the alphabet</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-icon">🔑</div>
+                    <div>Easy to use but can be broken with frequency analysis or brute force</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-icon">⚔️</div>
+                    <div>Named after Julius Caesar who used it to communicate with his generals</div>
+                </div>
+            </div>
+            
+            <div id="mono-info" class="hidden">
+                <div class="info-item">
+                    <div class="info-icon">🔒</div>
+                    <div>Substitution cipher that maps each character to a different random character</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-icon">🔄</div>
+                    <div>Creates a random mapping between characters (the "key")</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-icon">🔑</div>
+                    <div>More secure than Caesar but still vulnerable to frequency analysis</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-icon">⚔️</div>
+                    <div>Preserves the substitution key for decryption</div>
+                </div>
+            </div>
+        </div>
     </div>
-    <script src="script.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
+    <script>
+        // API Base URL - change this to your actual API endpoint
+        const API_BASE_URL = 'http://localhost:8000';
+
+        // Elements
+        const cipherTabs = document.querySelectorAll('.cipher-tab');
+        const tabs = document.querySelectorAll('.tab');
+        
+        // Caesar elements
+        const caesarEncryptForm = document.getElementById('caesar-encrypt-form');
+        const caesarDecryptForm = document.getElementById('caesar-decrypt-form');
+        const caesarAttackForm = document.getElementById('caesar-attack-form');
+        
+        // Mono elements
+        const monoEncryptForm = document.getElementById('mono-encrypt-form');
+        const monoDecryptForm = document.getElementById('mono-decrypt-form');
+        
+        // Info sections
+        const caesarInfo = document.getElementById('caesar-info');
+        const monoInfo = document.getElementById('mono-info');
+
+        // Current state
+        let currentCipher = 'caesar';
+        let currentOperation = 'encrypt';
+
+        // Initialize UI
+        function updateUI() {
+            // Hide all forms
+            caesarEncryptForm.classList.add('hidden');
+            caesarDecryptForm.classList.add('hidden');
+            caesarAttackForm.classList.add('hidden');
+            monoEncryptForm.classList.add('hidden');
+            monoDecryptForm.classList.add('hidden');
+            
+            // Hide all info sections
+            caesarInfo.classList.add('hidden');
+            monoInfo.classList.add('hidden');
+            
+            // Show the appropriate form and info
+            if (currentCipher === 'caesar') {
+                caesarInfo.classList.remove('hidden');
+                if (currentOperation === 'encrypt') {
+                    caesarEncryptForm.classList.remove('hidden');
+                } else if (currentOperation === 'decrypt') {
+                    caesarDecryptForm.classList.remove('hidden');
+                } else if (currentOperation === 'attack') {
+                    caesarAttackForm.classList.remove('hidden');
+                }
+            } else if (currentCipher === 'mono') {
+                monoInfo.classList.remove('hidden');
+                if (currentOperation === 'encrypt') {
+                    monoEncryptForm.classList.remove('hidden');
+                } else if (currentOperation === 'decrypt') {
+                    monoDecryptForm.classList.remove('hidden');
+                }
+                // Hide attack tab for monoalphabetic cipher
+                document.getElementById('attack-tab').style.display = 
+                    currentCipher === 'mono' ? 'none' : 'block';
+            }
+        }
+
+        // Tab click handlers
+        cipherTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Update active tab
+                cipherTabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                // Set current cipher
+                currentCipher = tab.id.split('-')[0];
+                
+                // Reset to encrypt operation when switching ciphers
+                currentOperation = 'encrypt';
+                tabs.forEach(t => {
+                    t.classList.remove('active', 'inactive');
+                    t.classList.add(t.id === 'encrypt-tab' ? 'active' : 'inactive');
+                });
+                
+                updateUI();
+            });
+        });
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Don't show attack tab for monoalphabetic
+                if (tab.id === 'attack-tab' && currentCipher === 'mono') {
+                    return;
+                }
+                
+                // Update active tab
+                tabs.forEach(t => {
+                    t.classList.remove('active', 'inactive');
+                    t.classList.add(t.id === tab.id ? 'active' : 'inactive');
+                });
+                
+                // Set current operation
+                currentOperation = tab.id.split('-')[0];
+                
+                updateUI();
+            });
+        });
+
+        // Copy button functionality
+        document.querySelectorAll('.copy-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const resultId = btn.id.replace('-copy', '');
+                const resultElement = document.getElementById(resultId);
+                
+                // Create a temporary textarea to copy the text
+                const textarea = document.createElement('textarea');
+                textarea.value = resultElement.textContent;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                
+                // Visual feedback
+                const originalIcon = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check"></i>';
+                setTimeout(() => {
+                    btn.innerHTML = originalIcon;
+                }, 1000);
+            });
+        });
+
+        // Caesar Encrypt
+        document.getElementById('caesar-encrypt-btn').addEventListener('click', async () => {
+            const plaintext = document.getElementById('caesar-plaintext').value;
+            const shift = parseInt(document.getElementById('caesar-shift').value);
+            
+            if (!plaintext) {
+                alert('Please enter text to encrypt');
+                return;
+            }
+            
+            if (isNaN(shift) || shift < 0 || shift > 25) {
+                alert('Shift must be between 0 and 25');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/caesar/encrypt`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text: plaintext, shift: shift }),
+                });
+                
+                if (!response.ok) {
+                    throw new Error('API request failed');
+                }
+                
+                const data = await response.json();
+                document.getElementById('caesar-encrypt-result').textContent = data.result;
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to encrypt text: ' + error.message);
+            }
+        });
+
+        // Caesar Decrypt
+        document.getElementById('caesar-decrypt-btn').addEventListener('click', async () => {
+            const ciphertext = document.getElementById('caesar-ciphertext').value;
+            const shift = parseInt(document.getElementById('caesar-decrypt-shift').value);
+            
+            if (!ciphertext) {
+                alert('Please enter text to decrypt');
+                return;
+            }
+            
+            if (isNaN(shift) || shift < 0 || shift > 25) {
+                alert('Shift must be between 0 and 25');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/caesar/decrypt`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text: ciphertext, shift: shift }),
+                });
+                
+                if (!response.ok) {
+                    throw new Error('API request failed');
+                }
+                
+                const data = await response.json();
+                document.getElementById('caesar-decrypt-result').textContent = data.result;
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to decrypt text: ' + error.message);
+            }
+        });
+
+        // Caesar Attack
+        document.getElementById('caesar-attack-btn').addEventListener('click', async () => {
+            const ciphertext = document.getElementById('caesar-attack-text').value;
+            
+            if (!ciphertext) {
+                alert('Please enter text to analyze');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/caesar/attack`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text: ciphertext }),
+                });
+                
+                if (!response.ok) {
+                    throw new Error('API request failed');
+                }
+                
+                const data = await response.json();
+                const resultsContainer = document.getElementById('caesar-attack-results');
+                resultsContainer.innerHTML = '';
+                
+                data.results.forEach(result => {
+                    const item = document.createElement('div');
+                    item.className = 'attack-item';
+                    item.innerHTML = `<strong>Shift ${result.shift}:</strong> ${result.plaintext}`;
+                    item.addEventListener('click', () => {
+                        // Populate decrypt form with this result
+                        document.getElementById('caesar-ciphertext').value = ciphertext;
+                        document.getElementById('caesar-decrypt-shift').value = result.shift;
+                        
+                        // Switch to decrypt tab
+                        tabs.forEach(t => {
+                            t.classList.remove('active', 'inactive');
+                            t.classList.add(t.id === 'decrypt-tab' ? 'active' : 'inactive');
+                        });
+                        currentOperation = 'decrypt';
+                        updateUI();
+                    });
+                    resultsContainer.appendChild(item);
+                });
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to analyze text: ' + error.message);
+            }
+        });
+
+        // Mono Encrypt
+        document.getElementById('mono-encrypt-btn').addEventListener('click', async () => {
+            const plaintext = document.getElementById('mono-plaintext').value;
+            
+            if (!plaintext) {
+                alert('Please enter text to encrypt');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/mono/encrypt`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text: plaintext }),
+                });
+                
+                if (!response.ok) {
+                    throw new Error('API request failed');
+                }
+                
+                const data = await response.json();
+                document.getElementById('mono-encrypt-result').textContent = data.result;
+                
+                // Format and display the key nicely
+                const formattedKey = JSON.stringify(data.key, null, 2);
+                document.getElementById('mono-key-display').textContent = formattedKey;
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to encrypt text: ' + error.message);
+            }
+        });
+
+        // Mono Decrypt
+        document.getElementById('mono-decrypt-btn').addEventListener('click', async () => {
+            const ciphertext = document.getElementById('mono-ciphertext').value;
+            const keyInput = document.getElementById('mono-key-input').value;
+            
+            if (!ciphertext) {
+                alert('Please enter text to decrypt');
+                return;
+            }
+            
+            if (!keyInput) {
+                alert('Please enter the decryption key');
+                return;
+            }
+            
+            let key;
+            try {
+                key = JSON.parse(keyInput);
+            } catch (e) {
+                alert('Invalid key format. Please use valid JSON format.');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/mono/decrypt`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text: ciphertext, key: key }),
+                });
+                
+                if (!response.ok) {
+                    throw new Error('API request failed');
+                }
+                
+                const data = await response.json();
+                document.getElementById('mono-decrypt-result').textContent = data.result;
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to decrypt text: ' + error.message);
+            }
+        });
+
+        // Initialize UI
+        updateUI();
+    </script>
 </body>
 </html>
