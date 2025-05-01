@@ -233,8 +233,8 @@
                 <label for="caesar-plaintext">Plaintext:</label>
                 <textarea id="caesar-plaintext" rows="5" placeholder="Enter text to encrypt..."></textarea>
 
-                <label for="caesar-shift">Shift (0-25):</label>
-                <input type="number" id="caesar-shift" min="0" max="25" value="3">
+                <label for="caesar-shift">Shift (0-256):</label>
+                <input type="number" id="caesar-shift" min="0" max="256" value="3">
 
                 <button id="caesar-encrypt-btn">
                     <i class="fas fa-lock"></i> Encrypt
@@ -256,8 +256,8 @@
                 <label for="caesar-ciphertext">Ciphertext:</label>
                 <textarea id="caesar-ciphertext" rows="5" placeholder="Enter text to decrypt..."></textarea>
 
-                <label for="caesar-decrypt-shift">Shift (0-25):</label>
-                <input type="number" id="caesar-decrypt-shift" min="0" max="25" value="3">
+                <label for="caesar-decrypt-shift">Shift (0-256):</label>
+                <input type="number" id="caesar-decrypt-shift" min="0" max="256" value="3">
 
                 <button id="caesar-decrypt-btn">
                     <i class="fas fa-unlock"></i> Decrypt
@@ -374,7 +374,7 @@
                 </div>
                 <div class="info-item">
                     <div class="info-icon">🔄</div>
-                    <div>Uses a shift value between 0-25 for the 26 letters of the alphabet</div>
+                    <div>Uses a shift value between 0-256 for the 256 letters of the alphabet</div>
                 </div>
                 <div class="info-item">
                     <div class="info-icon">🔑</div>
@@ -555,8 +555,8 @@
                 return;
             }
             
-            if (isNaN(shift) || shift < 0 || shift > 25) {
-                alert('Shift must be between 0 and 25');
+            if (isNaN(shift) || shift < 0 || shift > 256) {
+                alert('Shift must be between 0 and 256');
                 return;
             }
             
@@ -591,8 +591,8 @@
                 return;
             }
             
-            if (isNaN(shift) || shift < 0 || shift > 25) {
-                alert('Shift must be between 0 and 25');
+            if (isNaN(shift) || shift < 0 || shift > 256) {
+                alert('Shift must be between 0 and 256');
                 return;
             }
             

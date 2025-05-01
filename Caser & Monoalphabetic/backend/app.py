@@ -61,11 +61,11 @@ def caesar_encrypt(plaintext: str, shift: int) -> str:
     encrypted_text = ""
     for char in plaintext:
         if char.isalpha():
-            shift_amount = shift % 26
+            shift_amount = shift % 256
             if char.isupper():
-                new_char = chr((ord(char) - ord('A') + shift_amount) % 26 + ord('A'))
+                new_char = chr((ord(char) - ord('A') + shift_amount) % 256 + ord('A'))
             else:
-                new_char = chr((ord(char) - ord('a') + shift_amount) % 26 + ord('a'))
+                new_char = chr((ord(char) - ord('a') + shift_amount) % 256 + ord('a'))
             encrypted_text += new_char
         else:
             encrypted_text += char
@@ -75,7 +75,7 @@ def caesar_decrypt(ciphertext: str, shift: int) -> str:
     return caesar_encrypt(ciphertext, -shift)
 
 def caesar_attack(ciphertext: str) -> List[Dict[str, any]]:
-    return [{"shift": s, "plaintext": caesar_decrypt(ciphertext, s)} for s in range(26)]
+    return [{"shift": s, "plaintext": caesar_decrypt(ciphertext, s)} for s in range(256)]
 
 # --------------------------
 # Monoalphabetic Cipher
@@ -114,14 +114,14 @@ async def root():
 # ---- Caesar ----
 @app.post("/caesar/encrypt")
 async def encrypt_caesar(request: CipherRequest):
-    if request.shift is None or not 0 <= request.shift <= 25:
-        raise HTTPException(400, "Shift must be 0-25")
+    if request.shift is None or not 0 <= request.shift <= 256:
+        raise HTTPException(400, "Shift must be 0-256")
     return {"result": caesar_encrypt(request.text, request.shift)}
 
 @app.post("/caesar/decrypt")
 async def decrypt_caesar(request: DecryptRequest):
-    if request.shift is None or not 0 <= request.shift <= 25:
-        raise HTTPException(400, "Shift must be 0-25")
+    if request.shift is None or not 0 <= request.shift <= 256:
+        raise HTTPException(400, "Shift must be 0-256")
     return {"result": caesar_decrypt(request.text, request.shift)}
 
 @app.post("/caesar/attack", response_model=AttackResponse)
