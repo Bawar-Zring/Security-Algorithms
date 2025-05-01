@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cipher Encryption Tool</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Cipher Encryption Tool</h1>
+            <div class="cipher-select">
+                <label for="cipher-type">Select Cipher:</label>
+                <select id="cipher-type">
+                    <option value="caesar">Caesar Cipher</option>
+                    <option value="mono">Monoalphabetic Cipher</option>
+                </select>
+            </div>
+        </header>
+        
+        <main>
+            <div class="card">
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="encrypt">Encrypt</button>
+                    <button class="tab-btn" data-tab="decrypt">Decrypt</button>
+                    <button class="tab-btn" data-tab="attack">Attack</button>
+                </div>
+
+                <div class="tab-content active" id="encrypt">
+                    <div class="input-group">
+                        <label for="plaintext">Plaintext:</label>
+                        <textarea id="plaintext" placeholder="Enter text to encrypt..."></textarea>
+                    </div>
+                    
+                    <!-- Caesar Cipher Controls -->
+                    <div class="cipher-controls" id="caesar-controls">
+                        <div class="input-group">
+                            <label for="caesar-shift">Shift Value (0-255):</label>
+                            <div class="key-input-group">
+                                <input type="number" id="caesar-shift" min="0" max="255" value="13">
+                                <button id="random-shift" title="Generate Random Shift">
+                                    <i class="fas fa-dice"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Monoalphabetic Cipher Controls -->
+                    <div class="cipher-controls" id="mono-controls" style="display: none;">
+                        <div class="input-group">
+                            <label for="use-custom-key">Key Options:</label>
+                            <div class="key-options">
+                                <label>
+                                    <input type="radio" name="key-type" value="random" checked>
+                                    Generate random substitution key
+                                </label>
+                                <label>
+                                    <input type="radio" name="key-type" value="custom">
+                                    Use custom key
+                                </label>
+                            </div>
+                        </div>
+                        <div id="custom-key-input" style="display: none;">
+                            <div class="input-group">
+                                <label>Define Custom Key:</label>
+                                <div class="key-mapping-container">
+                                    <div class="key-mapping-help">
+                                        <p>Define character mappings below:</p>
+                                        <button id="add-mapping" title="Add Mapping">
+                                            <i class="fas fa-plus"></i> Add Mapping
+                                        </button>
+                                    </div>
+                                    <div id="key-mappings">
+                                        <!-- Mappings will be added here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button id="encrypt-btn" class="action-btn">
+                        <i class="fas fa-lock"></i> Encrypt
+                    </button>
+                    
+                    <div class="result-box">
+                        <label>Encrypted Result:</label>
+                        <div class="result-content">
+                            <pre id="encrypted-result">Your encrypted text will appear here...</pre>
+                            <button class="copy-btn" data-target="encrypted-result">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="key-display">
+                        <label>Encryption Key:</label>
+                        <div class="key-content">
+                            <pre id="encryption-key-display">Key will appear here after encryption...</pre>
+                            <button class="copy-btn" data-target="encryption-key-display">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="decrypt">
+                    <div class="input-group">
+                        <label for="ciphertext">Ciphertext:</label>
+                        <textarea id="ciphertext" placeholder="Enter text to decrypt..."></textarea>
+                    </div>
+                    
+                    <!-- Caesar Cipher Decrypt Controls -->
+                    <div class="cipher-controls" id="caesar-decrypt-controls">
+                        <div class="input-group">
+                            <label for="caesar-decrypt-shift">Shift Value (0-255):</label>
+                            <input type="number" id="caesar-decrypt-shift" min="0" max="255" value="13">
+                        </div>
+                    </div>
+                    
+                    <!-- Monoalphabetic Cipher Decrypt Controls -->
+                    <div class="cipher-controls" id="mono-decrypt-controls" style="display: none;">
+                        <div class="input-group">
+                            <label for="key-input">Enter Substitution Key (JSON format):</label>
+                            <textarea id="key-input" placeholder='{"a":"x", "b":"y", ...}'></textarea>
+                        </div>
+                    </div>
+                    
+                    <button id="decrypt-btn" class="action-btn">
+                        <i class="fas fa-unlock"></i> Decrypt
+                    </button>
+                    
+                    <div class="result-box">
+                        <label>Decrypted Result:</label>
+                        <div class="result-content">
+                            <pre id="decrypted-result">Your decrypted text will appear here...</pre>
+                            <button class="copy-btn" data-target="decrypted-result">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="attack">
+                    <div class="input-group">
+                        <label for="attack-text">Ciphertext to Analyze:</label>
+                        <textarea id="attack-text" placeholder="Enter encrypted text to analyze..."></textarea>
+                    </div>
+                    
+                    <button id="attack-btn" class="action-btn">
+                        <i class="fas fa-search"></i> Analyze
+                    </button>
+                    
+                    <div class="result-box">
+                        <label>Attack Results:</label>
+                        <div id="attack-results" class="attack-results">
+                            <div class="no-results">Analysis results will appear here...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card info-card">
+                <h2>About Cipher Tools</h2>
+                <div id="caesar-info">
+                    <h3>Caesar Cipher</h3>
+                    <ul>
+                        <li><i class="fas fa-history"></i> One of the simplest encryption techniques</li>
+                        <li><i class="fas fa-exchange-alt"></i> Shifts characters by a fixed value</li>
+                        <li><i class="fas fa-shield-alt"></i> Vulnerable to brute force attacks</li>
+                        <li><i class="fas fa-info-circle"></i> Used by Julius Caesar to communicate</li>
+                    </ul>
+                </div>
+                
+                <div id="mono-info" style="display: none;">
+                    <h3>Monoalphabetic Cipher</h3>
+                    <ul>
+                        <li><i class="fas fa-random"></i> Substitutes each character with another</li>
+                        <li><i class="fas fa-key"></i> Uses a substitution key for mapping</li>
+                        <li><i class="fas fa-chart-bar"></i> Vulnerable to frequency analysis</li>
+                        <li><i class="fas fa-puzzle-piece"></i> More complex than Caesar cipher</li>
+                    </ul>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
