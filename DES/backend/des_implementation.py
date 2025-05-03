@@ -5,7 +5,6 @@ including S-Boxes, P-Box, Initial Permutation (IP), and Final Permutation (FP).
 """
 
 import random
-import textwrap
 
 class DES:
     def __init__(self):
@@ -33,7 +32,15 @@ class DES:
             33, 1, 41, 9, 49, 17, 57, 25
         ]
 
-        # Expansion (E) Box Table
+        # Permutation (P) Box Table for key
+        self.P_BOX = [
+            16, 7, 20, 21, 29, 12, 28, 17,
+            1, 15, 23, 26, 5, 18, 31, 10,
+            2, 8, 24, 14, 32, 27, 3, 9,
+            19, 13, 30, 6, 22, 11, 4, 25
+        ]
+        
+        # Expansion (E) Box Table 32 -> 48 bits
         self.E_BOX = [
             32, 1, 2, 3, 4, 5,
             4, 5, 6, 7, 8, 9,
@@ -45,15 +52,7 @@ class DES:
             28, 29, 30, 31, 32, 1
         ]
 
-        # Permutation (P) Box Table
-        self.P_BOX = [
-            16, 7, 20, 21, 29, 12, 28, 17,
-            1, 15, 23, 26, 5, 18, 31, 10,
-            2, 8, 24, 14, 32, 27, 3, 9,
-            19, 13, 30, 6, 22, 11, 4, 25
-        ]
-
-        # S-Boxes
+        # S-Boxes in DES heart 48 -> 32 bits
         self.S_BOXES = [
             # S1
             [
@@ -113,7 +112,7 @@ class DES:
             ]
         ]
 
-        # Permuted Choice 1 (PC-1) table for key preparation
+        # Permuted Choice 1 (PC-1) table for key preparation (56 bits)
         self.PC1 = [
             57, 49, 41, 33, 25, 17, 9,
             1, 58, 50, 42, 34, 26, 18,
@@ -125,7 +124,7 @@ class DES:
             21, 13, 5, 28, 20, 12, 4
         ]
 
-        # Permuted Choice 2 (PC-2) table for subkey generation
+        # Permuted Choice 2 (PC-2) table for subkey generation (48 bits)
         self.PC2 = [
             14, 17, 11, 24, 1, 5, 3, 28,
             15, 6, 21, 10, 23, 19, 12, 4,
@@ -322,7 +321,6 @@ class DES:
         # Generate a random key if none provided
         if key is None:
             key = self._generate_random_key()
-            print(f"Generated random key: {self._binary_to_hex(key)}")
         
         # Generate subkeys
         subkeys = self.generate_subkeys(key)
@@ -336,12 +334,12 @@ class DES:
         # Combine the encrypted blocks
         encrypted_binary = ''.join(encrypted_blocks)
         
-        # Return in the requested format
+        # Return in the cipher in format of binary.
         if output_type == 'hex':
             return self._binary_to_hex(encrypted_binary)
         else:
             return encrypted_binary
-    
+            
     def decrypt(self, ciphertext, key, input_type='hex', output_type='text'):
         """
         Decrypt the ciphertext using DES.
@@ -369,67 +367,3 @@ class DES:
             return self._binary_to_hex(decrypted_binary)
         else:
             return decrypted_binary
-
-    def demonstrate(self):
-        """Demonstrate the DES algorithm with a test case."""
-        # Generate a random message and key
-        message = self._generate_random_message()
-        key = self._generate_random_key()
-        
-        print(f"Original Message (Binary): {message}")
-        print(f"Original Message (Hex): {self._binary_to_hex(message)}")
-        print(f"Key (Binary): {key}")
-        print(f"Key (Hex): {self._binary_to_hex(key)}")
-        
-        # Generate subkeys
-        subkeys = self.generate_subkeys(key)
-        print("\nGenerated Subkeys:")
-        for i, subkey in enumerate(subkeys):
-            print(f"Subkey {i+1}: {self._binary_to_hex(subkey)}")
-        
-        # Encrypt the message
-        encrypted = self.encrypt_block(message, subkeys)
-        print(f"\nEncrypted Message (Binary): {encrypted}")
-        print(f"Encrypted Message (Hex): {self._binary_to_hex(encrypted)}")
-        
-        # Decrypt the message
-        decrypted = self.decrypt_block(encrypted, subkeys)
-        print(f"\nDecrypted Message (Binary): {decrypted}")
-        print(f"Decrypted Message (Hex): {self._binary_to_hex(decrypted)}")
-        
-        # Verification
-        print(f"\nVerification: {'Success' if message == decrypted else 'Failed'}")
-
-def run_example():
-    """Run an example of the DES encryption and decryption process."""
-    des = DES()
-    
-    # Example with text input
-    plaintext = "Hello, World! This is a test of DES encryption."
-    key = des._generate_random_key()
-    
-    print("="*50)
-    print("DES Encryption/Decryption Example")
-    print("="*50)
-    print(f"Original Text: {plaintext}")
-    print(f"Key (Hex): {des._binary_to_hex(key)}")
-    
-    # Encrypt the plaintext
-    encrypted = des.encrypt(plaintext, key, 'text', 'hex')
-    print(f"\nEncrypted Text (Hex): {encrypted}")
-    
-    # Decrypt the ciphertext
-    decrypted = des.decrypt(encrypted, key, 'hex', 'text')
-    print(f"\nDecrypted Text: {decrypted}")
-    
-    # Verify the results
-    print(f"\nVerification: {'Success' if decrypted == plaintext else 'Failed'}")
-    
-    # Demonstrate the algorithm step by step
-    print("\n" + "="*50)
-    print("Step-by-Step DES Algorithm Demonstration")
-    print("="*50)
-    des.demonstrate()
-
-if __name__ == '__main__':
-    run_example() 
