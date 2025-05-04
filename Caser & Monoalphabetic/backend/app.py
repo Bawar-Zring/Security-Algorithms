@@ -51,6 +51,7 @@ class CipherResponse(BaseModel):
 class AttackResponse(BaseModel):
     results: List[dict]
 
+# Caesar Cipher encryption (Shady)
 def caesar_encrypt(plaintext: str, shift: int) -> str:
     encrypted_text = ""
     for char in plaintext:
@@ -65,8 +66,10 @@ def caesar_encrypt(plaintext: str, shift: int) -> str:
             encrypted_text += char
     return encrypted_text
 
+# Caesar Cipher decryption (muhamad)
 def caesar_decrypt(ciphertext: str, shift: int) -> str:
     return caesar_encrypt(ciphertext, -shift)
+
 
 def caesar_attack(ciphertext: str) -> List[Dict[str, any]]:
     return [{"shift": s, "plaintext": caesar_decrypt(ciphertext, s)} for s in range(256)]
@@ -77,6 +80,7 @@ def create_substitution_key() -> Dict[str, str]:
     random.shuffle(shuffled)
     return dict(zip(chars, shuffled))
 
+# Monoalphabetic Cipher encryption (Barham)
 def monoalphabetic_encrypt(text: str) -> tuple[str, Dict[str, str]]:
     key = create_substitution_key()
     encrypted = ''.join(key.get(c, c) for c in text)

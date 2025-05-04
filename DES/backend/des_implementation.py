@@ -301,15 +301,6 @@ class DES:
         # Step 5: Apply final permutation (FP)
         return self._apply_permutation(combined, self.FP)
     
-    def decrypt_block(self, block, subkeys):
-        """
-        Decrypt a single 64-bit block using DES.
-        - block: 64-bit block to decrypt (in binary)
-        - subkeys: List of 16 subkeys for decryption (reverse order of encryption subkeys)
-        """
-        # For decryption, use the same algorithm but with subkeys in reverse order
-        return self.encrypt_block(block, subkeys[::-1])
-    
     def encrypt(self, plaintext, key=None, input_type='text', output_type='hex'):
         """
         Encrypt the plaintext using DES.
@@ -339,31 +330,3 @@ class DES:
             return self._binary_to_hex(encrypted_binary)
         else:
             return encrypted_binary
-            
-    def decrypt(self, ciphertext, key, input_type='hex', output_type='text'):
-        """
-        Decrypt the ciphertext using DES.
-        - ciphertext: The text to decrypt
-        - key: 64-bit key (binary)
-        - input_type: 'hex' or 'binary'
-        - output_type: 'text', 'hex', or 'binary'
-        """
-        # Generate subkeys
-        subkeys = self.generate_subkeys(key)
-        
-        # Prepare ciphertext into 64-bit blocks
-        blocks = self._prepare_input(ciphertext, input_type)
-        
-        # Decrypt each block
-        decrypted_blocks = [self.decrypt_block(block, subkeys) for block in blocks]
-        
-        # Combine the decrypted blocks
-        decrypted_binary = ''.join(decrypted_blocks)
-        
-        # Return in the requested format
-        if output_type == 'text':
-            return self._binary_to_str(decrypted_binary)
-        elif output_type == 'hex':
-            return self._binary_to_hex(decrypted_binary)
-        else:
-            return decrypted_binary

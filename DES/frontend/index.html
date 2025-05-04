@@ -17,7 +17,6 @@
             <div class="card">
                 <div class="tabs">
                     <button class="tab-btn active" data-tab="encrypt">Encrypt</button>
-                    <button class="tab-btn" data-tab="decrypt">Decrypt</button>
                 </div>
 
                 <div class="tab-content active" id="encrypt">
@@ -42,29 +41,6 @@
                         <div class="result-content">
                             <pre id="encrypted-result">Your encrypted text will appear here...</pre>
                             <button class="copy-btn" data-target="encrypted-result">
-                                <i class="fas fa-copy"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="tab-content" id="decrypt">
-                    <div class="input-group">
-                        <label for="ciphertext">Ciphertext:</label>
-                        <textarea id="ciphertext" placeholder="Enter text to decrypt..."></textarea>
-                    </div>
-                    <div class="input-group">
-                        <label for="decryption-key">Key (64-bit binary):</label>
-                        <input type="text" id="decryption-key" placeholder="Enter the decryption key...">
-                    </div>
-                    <button id="decrypt-btn" class="action-btn">
-                        <i class="fas fa-unlock"></i> Decrypt
-                    </button>
-                    <div class="result-box">
-                        <label>Decrypted Result:</label>
-                        <div class="result-content">
-                            <pre id="decrypted-result">Your decrypted text will appear here...</pre>
-                            <button class="copy-btn" data-target="decrypted-result">
                                 <i class="fas fa-copy"></i>
                             </button>
                         </div>
