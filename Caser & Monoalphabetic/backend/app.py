@@ -6,11 +6,11 @@ from typing import List, Dict, Optional
 from collections import Counter
 import random
 import string
-from fastapi.staticfiles import StaticFiles          # ★
-from fastapi.responses import FileResponse           # ★
+from fastapi.staticfiles import StaticFiles          
+from fastapi.responses import FileResponse           
 from pathlib import Path 
 
-BASE_DIR = Path(__file__).resolve().parent           # .../backend
+BASE_DIR = Path(__file__).resolve().parent          
 FRONT_DIR = BASE_DIR.parent / "frontend"
 
 app = FastAPI(
@@ -35,9 +35,6 @@ def serve_spa():
     """Return the main HTML file."""
     return FileResponse(FRONT_DIR / "index.html")
 
-# --------------------------
-# Request / Response models
-# --------------------------
 class CipherRequest(BaseModel):
     text: str
     shift: Optional[int] = None           # used only by Caesar
@@ -54,9 +51,6 @@ class CipherResponse(BaseModel):
 class AttackResponse(BaseModel):
     results: List[dict]
 
-# --------------------------
-# Caesar Cipher
-# --------------------------
 def caesar_encrypt(plaintext: str, shift: int) -> str:
     encrypted_text = ""
     for char in plaintext:
@@ -77,9 +71,6 @@ def caesar_decrypt(ciphertext: str, shift: int) -> str:
 def caesar_attack(ciphertext: str) -> List[Dict[str, any]]:
     return [{"shift": s, "plaintext": caesar_decrypt(ciphertext, s)} for s in range(256)]
 
-# --------------------------
-# Monoalphabetic Cipher
-# --------------------------
 def create_substitution_key() -> Dict[str, str]:
     chars = list(string.ascii_letters + string.digits + string.punctuation + ' ')
     shuffled = chars.copy()
@@ -95,9 +86,6 @@ def monoalphabetic_decrypt(text: str, key: Dict[str, str]) -> str:
     reverse_key = {v: k for k, v in key.items()}
     return ''.join(reverse_key.get(c, c) for c in text)
 
-# --------------------------
-# Routes
-# --------------------------
 @app.get("/")
 async def root():
     return {
@@ -140,9 +128,6 @@ async def decrypt_mono(request: DecryptRequest):
         raise HTTPException(400, "Decryption key required")
     return CipherResponse(result=monoalphabetic_decrypt(request.text, request.key))
 
-# --------------------------
-# Uvicorn entry point
-# --------------------------
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="127.0.0.1", port=8000)
