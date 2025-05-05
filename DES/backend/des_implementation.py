@@ -32,7 +32,7 @@ class DES:
             33, 1, 41, 9, 49, 17, 57, 25
         ]
 
-        # Permutation (P) Box Table for key
+        # Permutation (P) Box Table for S-Box output (32 -> 32 bits), Straight D-Box
         self.P_BOX = [
             16, 7, 20, 21, 29, 12, 28, 17,
             1, 15, 23, 26, 5, 18, 31, 10,
@@ -136,12 +136,6 @@ class DES:
 
         # Rotation schedule for key bits - number of bits to rotate left per round
         self.ROTATIONS = [1, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1]
-        
-        # Parity bit positions
-        self.PARITY_BITS = [8, 16, 24, 32, 40, 48, 56, 64]
-        
-        # Bits removed during PC-2
-        self.REMOVED_PC2_BITS = [9, 18, 22, 25, 35, 38, 43, 54]
 
     def _str_to_binary(self, text):
         """Convert a string to its binary representation."""
@@ -154,11 +148,6 @@ class DES:
     def _binary_to_hex(self, binary):
         """Convert a binary string to its hexadecimal representation."""
         return hex(int(binary, 2))[2:].zfill(len(binary) // 4)
-    
-    def _binary_to_str(self, binary):
-        """Convert a binary string to its ASCII representation."""
-        binary = binary.zfill((len(binary) + 7) // 8 * 8)  # Ensure multiple of 8
-        return ''.join(chr(int(binary[i:i+8], 2)) for i in range(0, len(binary), 8))
     
     def _apply_permutation(self, block, table):
         """Apply a permutation table to a bit string."""
@@ -173,11 +162,7 @@ class DES:
         return ''.join('1' if b1 != b2 else '0' for b1, b2 in zip(bits1, bits2))
     
     def _generate_random_key(self):
-        """Generate a random 64-bit key."""
-        return ''.join(random.choice('01') for _ in range(64))
-    
-    def _generate_random_message(self):
-        """Generate a random 64-bit message."""
+        """Generate a random 64-bit master key."""
         return ''.join(random.choice('01') for _ in range(64))
     
     def _prepare_input(self, input_data, input_type='binary', block_size=64):
@@ -209,22 +194,17 @@ class DES:
         """
         Generate the 16 subkeys for DES encryption/decryption.
         - key: 64-bit key string (in binary)
-        """
-        # Step 1: Remove parity bits (bits at positions 8, 16, 24, 32, 40, 48, 56, 64)
-        # Convert to a list of bits for easier manipulation
-        key_bits = list(key)
-        key_without_parity = ''.join(key_bits[i-1] for i in range(1, 65) if i not in self.PARITY_BITS)
-        
-        # Step 2: Apply PC-1 permutation
+        """        
+        # Step 1: Apply PC-1 permutation & remove parity bits
         key_pc1 = self._apply_permutation(key, self.PC1)
         
-        # Step 3: Split into C and D parts
+        # Step 2: Split into C and D parts
         c = key_pc1[:28]
         d = key_pc1[28:]
         
         subkeys = []
         
-        # Step 4 & 5: Generate 16 subkeys with rotations and PC-2
+        # Step 3: Generate 16 subkeys with rotations and PC-2
         for i in range(16):
             # Rotate bits according to the rotation schedule
             c = self._left_shift(c, self.ROTATIONS[i])
@@ -233,7 +213,7 @@ class DES:
             # Combine C and D
             cd = c + d
             
-            # Apply PC-2 permutation to get the subkey
+            # Apply PC-2 permutation & remove other 8 bits to get the subkey 56 -> 48 bits
             subkey = self._apply_permutation(cd, self.PC2)
             subkeys.append(subkey)
         
