@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHA-512 Hashing Tool</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>SHA-512 Hashing Tool</h1>
+        </header>
+        
+        <main>
+            <div class="card">
+                <div class="input-group">
+                    <label for="message">Message:</label>
+                    <textarea id="message" placeholder="Enter text to hash..."></textarea>
+                </div>
+                <button id="hash-btn" class="action-btn">
+                    🔐 Generate Hash
+                </button>
+                <div class="result-box">
+                    <label>SHA-512 Hash:</label>
+                    <div class="result-content">
+                        <pre id="hash-result">Your hash will appear here...</pre>
+                        <button class="copy-btn" data-target="hash-result">
+                            📋
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card info-card">
+                <h2>About SHA-512 Hashing</h2>
+                <ul>
+                    <li>🔒 Strong cryptographic hash function</li>
+                    <li>🔄 Produces a 512-bit (64-byte) hash value</li>
+                    <li>🔑 One-way function - cannot be reversed</li>
+                    <li>⚔️ Used for digital signatures and integrity verification</li>
+                    <li>🧩 Small changes in input produce completely different outputs</li>
+                </ul>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
