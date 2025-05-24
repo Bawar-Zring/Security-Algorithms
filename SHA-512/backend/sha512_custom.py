@@ -8,7 +8,7 @@ INITIAL_HASHES = [
     0x1f83d9abfb41bd6b, 0x5be0cd19137e2179
 ]
 
-# Full SHA-512 constants K[0..79]
+# SHA-512 round constants
 K = [
     0x428a2f98d728ae22, 0x7137449123ef65cd, 0xb5c0fbcfec4d3b2f, 0xe9b5dba58189dbbc,
     0x3956c25bf348b538, 0x59f111f1b605d019, 0x923f82a4af194f9b, 0xab1c5ed5da6d8118,
@@ -32,45 +32,44 @@ K = [
     0x4cc5d4becb3e42b6, 0x597f299cfc657e2a, 0x5fcb6fab3ad6faec, 0x6c44198c4a475817
 ]
 
-def pad_message(message: bytes) -> bytes:
-    l = len(message) * 8
-    message += b'\x80'
-    message += b'\x00' * ((112 - len(message) % 128) % 128)
-    message += struct.pack('>Q', 0) + struct.pack('>Q', l)
-    return message
+# Pads the message to a multiple of 1024 bits
+def pad_message(message: bytes) -> str:
+    message_bit_len = len(message) * 8
+    message_bits = ''.join(f'{byte:08b}' for byte in message)
+    message_bits += '1'
+    total_length = message_bit_len + 1 + 128
+    remainder = total_length % 1024
+    padding_zeros = (1024 - remainder) % 1024
+    message_bits += '0' * padding_zeros
+    message_bits += f'{message_bit_len:0128b}'
+    return message_bits
 
-def split_blocks(message: bytes, block_size=128):
-    return [message[i:i+block_size] for i in range(0, len(message), block_size)]
+# Splits the bit string into 1024-bit blocks
+def split_blocks_bits(message_bits: str, block_size=1024):
+    return [message_bits[i:i + block_size] for i in range(0, len(message_bits), block_size)]
 
-def get_words(block: bytes):
-    W = list(struct.unpack('>16Q', block))
+# Generates the message schedule (W) for one block
+def get_words(block_bits: str):
+    W = [int(block_bits[i:i+64], 2) for i in range(0, 1024, 64)][:16]
     for i in range(16, 80):
-        w = (W[i-16] + W[i-15] + W[i-7] + W[i-2]) % (1 << 64)
-        W.append(w)
+        val = (W[i - 16] + W[i - 15] + W[i - 7] + W[i - 2]) % (1 << 64)
+        W.append(val)
     return W
 
-def initialize_round_buffers():
-    return list(INITIAL_HASHES)
-
-def compression_function(block: bytes, hash_state):
-    W = get_words(block)
-    a, b, c, d, e, f, g, h = initialize_round_buffers()
-
+# Processes one block and updates the hash values
+def compression(block_bits: str, H):
+    W = get_words(block_bits)
+    a, b, c, d, e, f, g, h = INITIAL_HASHES
     for i in range(80):
         a = (a + W[i]) % (1 << 64)
         h = (h + K[i]) % (1 << 64)
-        # b to g remain unchanged
+    return [(x + y) % (1 << 64) for x, y in zip(H, [a, b, c, d, e, f, g, h])]
 
-    # Final hash state update
-    hash_state = [(x + y) % (1 << 64) for x, y in zip(hash_state, [a, b, c, d, e, f, g, h])]
-    return hash_state
-
+# Main hash function
 def sha512_custom(message: bytes) -> str:
-    message = pad_message(message)
-    blocks = split_blocks(message)
-    hash_state = list(INITIAL_HASHES)
-
-    for block in blocks:
-        hash_state = compression_function(block, hash_state)
-
-    return ''.join(f'{x:016x}' for x in hash_state)
+    message_bits = pad_message(message)
+    blocks = split_blocks_bits(message_bits)
+    H = list(INITIAL_HASHES)
+    for block_bits in blocks:
+        H = compression(block_bits, H)
+    return ''.join(f'{x:016x}' for x in H)
